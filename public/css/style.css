@@ -3365,7 +3365,11 @@ pre {
   .form-radio input:focus + label {
     outline: none; }
    .text-black {
-    text-color: black;
+        color: black;
+    }
+    .text-black:hover{
+         color: black;
+    }
    }
   .form-radio input:hover {
     background-color: #1da0f2;

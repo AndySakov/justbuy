@@ -10,37 +10,16 @@ import javax.inject._
 import models.User
 import play.api.libs.json.Json
 import play.api.mvc._
+import api.utils.Utils._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
- * This controller creates an `Action` to handle HTTP requests to the
- * application's home page.
+ * This controller creates an `Action` to handle HTTP requests that alter the users table
  */
 @Singleton
-class HomeController @Inject()(users: UserDAO, val controllerComponents: ControllerComponents, authAction: AuthAction) extends BaseController {
-
-  /**
-   * Error 404 custom return handler
-   *
-   * The configuration in the `routes` file means that this method
-   * will be called when the application receives a `GET` request with
-   * a path of `/` or any other undefined path.
-   */
-  def fof(O: String): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    O.toSeq
-    NotFound(views.html.err404())
-  }
-
-  /**
-   * A function to extract the body of a request sent as xxx-form-url-encoded
-   * @param request the request to extract the body from
-   * @return the extracted body
-   */
-  def body(implicit request: Request[AnyContent]): Option[Map[String, Seq[String]]] = {
-    request.body.asFormUrlEncoded
-  }
+class UserController @Inject()(users: UserDAO, val controllerComponents: ControllerComponents, authAction: AuthAction) extends BaseController {
 
   /**
    * User creation handler
@@ -54,10 +33,12 @@ class HomeController @Inject()(users: UserDAO, val controllerComponents: Control
       body match {
         case Some(data) =>
           val username = data("username").head
+          val email = data("email").head
+          val phone = data("email").head
           val pass = data("pass").head
           val fullname = data("fullname").head
           val dob = data("dob").head.split("-").map(_.toInt)
-          users.createUser(User(randomUUID, username, pass, fullname, LocalDate.of(dob(2), dob(1), dob(0)), LocalDateTime.now())).map(x => Ok(Json.obj(
+          users.createUser(User(unique_id = randomUUID, username = username, email = email, phone = phone, pass = pass, fullname = fullname, dob = LocalDate.of(dob(2), dob(1), dob(0)), toc = LocalDateTime.now())).map(x => Ok(Json.obj(
             ("success", Json.toJson(x._1)),
             ("message", Json.toJson(Message.message(x._2)))
           )))

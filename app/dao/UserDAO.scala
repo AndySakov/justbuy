@@ -50,6 +50,7 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
       case "username" => Users.filter(x => x.unique_id === user.unique_id).map(_.username).update(new_detail).map(_ => ())
       case "pass" => Users.filter(x => x.unique_id === user.unique_id).map(_.pass).update(new_detail).map(_ => ())
       case "fullname" => Users.filter(x => x.unique_id === user.unique_id).map(_.fullname).update(new_detail).map(_ => ())
+      case "phone" => Users.filter(x => x.unique_id === user.unique_id).map(_.phone).update(new_detail).map(_ => ())
     }
     db.run(op)
   }
@@ -77,12 +78,14 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
 
   private class UsersTable(tag: Tag) extends Table[User](tag, "users") {
     def unique_id: Rep[String] = column[String]("UUID", O.Unique)
+    def email: Rep[String] = column[String]("email")
+    def phone: Rep[String] = column[String]("phone")
     def username: Rep[String] = column[String]("username", O.Unique, O.PrimaryKey)
     def pass: Rep[String] = column[String]("password")
     def fullname: Rep[String] = column[String]("fullname")
     def dob: Rep[LocalDate] = column[LocalDate]("DOB")
     def toc: Rep[LocalDateTime] = column[LocalDateTime]("TOC")
 
-    def * = (unique_id, username, pass, fullname, dob, toc) <> (User.tupled, User.unapply)
+    def * = (unique_id, username, email, phone, pass, fullname, dob, toc) <> (User.tupled, User.unapply)
   }
 }

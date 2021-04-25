@@ -1,4 +1,4 @@
-name := """scala-rest-api-with-auth"""
+name := """justbuy"""
 organization := "com.shiftio"
 
 version := "1.0"
