@@ -31,11 +31,11 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
     implicit request: Request[AnyContent] => {
       body match {
         case Some(data) =>
-          val username = data("username").head
+          val username = data("user").head
           val email = data("email").head
-          val phone = data("email").head
+          val phone = data("phone").head
           val pass = data("pass").head
-          val fullname = data("fullname").head
+          val fullname = data("name").head
           users.createUser(User(unique_id = randomUUID, username = username, email = email, phone = phone, pass = pass, fullname = fullname, toc = LocalDateTime.now())).map(x => Ok(Json.obj(
             ("success", Json.toJson(x._1)),
             ("message", Json.toJson(Message.message(x._2)))
