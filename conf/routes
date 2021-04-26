@@ -7,23 +7,32 @@
 ## Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
+# UserController Routes
 +nocsrf
-POST    /auth/user          controllers.UserController.authUser
+POST    /auth/user          controllers.UserController.authUser()
 
 +nocsrf
-POST    /create/user      controllers.UserController.createUser
+POST    /create/user      controllers.UserController.createUser()
 
 +nocsrf
 PUT     /update/user/:part  controllers.UserController.updateUser(part: String)
 
 +nocsrf
-DELETE  /remove/user        controllers.UserController.removeUser
+DELETE  /remove/user        controllers.UserController.removeUser()
+
+# PageController Routes
+GET     /login            controllers.PageController.login()
+
+GET     /create           controllers.PageController.create()
 
 # ProductController Routes
 
 
-# PageController Routes
-GET     /                 controllers.PageController.fof(O = "")
+
+
+
+
+GET     /                 controllers.PageController.red2L()
 
 GET     /*O               controllers.PageController.fof(O: String)
 

@@ -36,8 +36,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
           val phone = data("email").head
           val pass = data("pass").head
           val fullname = data("fullname").head
-          val dob = data("dob").head.split("-").map(_.toInt)
-          users.createUser(User(unique_id = randomUUID, username = username, email = email, phone = phone, pass = pass, fullname = fullname, dob = LocalDate.of(dob(2), dob(1), dob(0)), toc = LocalDateTime.now())).map(x => Ok(Json.obj(
+          users.createUser(User(unique_id = randomUUID, username = username, email = email, phone = phone, pass = pass, fullname = fullname, toc = LocalDateTime.now())).map(x => Ok(Json.obj(
             ("success", Json.toJson(x._1)),
             ("message", Json.toJson(Message.message(x._2)))
           )))
