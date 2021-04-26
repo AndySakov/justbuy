@@ -83,9 +83,8 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
     def username: Rep[String] = column[String]("username", O.Unique, O.PrimaryKey)
     def pass: Rep[String] = column[String]("password")
     def fullname: Rep[String] = column[String]("fullname")
-    def dob: Rep[LocalDate] = column[LocalDate]("DOB")
     def toc: Rep[LocalDateTime] = column[LocalDateTime]("TOC")
 
-    def * = (unique_id, username, email, phone, pass, fullname, dob, toc) <> (User.tupled, User.unapply)
+    def * = (unique_id, username, email, phone, pass, fullname, toc) <> (User.tupled, User.unapply)
   }
 }

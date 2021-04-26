@@ -21,4 +21,11 @@ class PageController @Inject()(val controllerComponents: ControllerComponents) e
     NotFound(views.html.err404())
   }
 
+  def login(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.login())
+  }
+
+  def create(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.register())
+  }
 }
