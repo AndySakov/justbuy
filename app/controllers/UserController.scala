@@ -4,7 +4,6 @@ import java.time.{LocalDate, LocalDateTime}
 
 import api.misc.Message
 import api.utils.UUIDGenerator.randomUUID
-import auth.AuthAction
 import dao.UserDAO
 import javax.inject._
 import models.User
@@ -19,7 +18,7 @@ import scala.concurrent.Future
  * This controller creates an `Action` to handle HTTP requests that alter the users table
  */
 @Singleton
-class UserController @Inject()(users: UserDAO, val controllerComponents: ControllerComponents, authAction: AuthAction) extends BaseController {
+class UserController @Inject()(users: UserDAO, val controllerComponents: ControllerComponents) extends BaseController {
 
   /**
    * User creation handler
@@ -28,7 +27,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
    * will be called when the application receives a `POST` request with
    * a path of `/create/user`.
    */
-  def createUser(): Action[AnyContent] = authAction.async {
+  def createUser(): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] => {
       body match {
         case Some(data) =>
@@ -54,7 +53,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
    * will be called when the application receives a `PUT` request with
    * a path of `/update/user/:part` where part is the detail to update.
    */
-  def updateUser(part: String): Action[AnyContent] = authAction.async {
+  def updateUser(part: String): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] => {
       body match {
         case Some(data) =>
@@ -74,7 +73,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
    * will be called when the application receives a `POST` request with
    * a path of `/auth/user`.
    */
-  def authUser(): Action[AnyContent] = authAction.async{
+  def authUser(): Action[AnyContent] = Action.async{
     implicit request: Request[AnyContent] => {
       body match {
         case Some(data) =>
@@ -93,7 +92,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
    * will be called when the application receives a `DELETE` request with
    * a path of `/delete/user`.
    */
-  def removeUser(): Action[AnyContent] = authAction.async {
+  def removeUser(): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] => {
       body match {
         case Some(data) =>

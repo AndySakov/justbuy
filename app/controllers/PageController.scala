@@ -1,6 +1,5 @@
 package controllers
 
-import auth.AuthAction
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Request}
 
@@ -8,7 +7,7 @@ import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, R
  * This controller creates an `Action` to handle HTTP requests to show pages
  */
 @Singleton
-class PageController @Inject()(val controllerComponents: ControllerComponents, authAction: AuthAction) extends BaseController {
+class PageController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
 
   /**
    * Error 404 custom return handler
