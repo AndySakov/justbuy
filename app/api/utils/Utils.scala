@@ -18,7 +18,5 @@ object Utils {
    * @param request the request to extract the body from
    * @return the extracted body
    */
-  def body(implicit request: Request[AnyContent]): Option[Map[String, Seq[String]]] = {
-    request.body.asFormUrlEncoded
-  }
+  def body(implicit request: Request[AnyContent]): Option[Map[String, Seq[String]]] = request.body.asFormUrlEncoded
 }
