@@ -27,8 +27,3 @@ libraryDependencies ++= Seq(
   "com.pauldijou" %% "jwt-core" % "5.0.0",
   "com.auth0" % "jwks-rsa" % "0.6.1"
 )
-// Adds additional packages into Twirl
-//TwirlKeys.templateImports += "com.frisbee.controllers._"
-
-// Adds additional packages into conf/routes
-// play.sbt.routes.RoutesKeys.routesImport += "com.frisbee.binders._"
