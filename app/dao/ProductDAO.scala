@@ -145,7 +145,7 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
 
 
   class ProductsTable(tag: Tag) extends Table[Product](tag, "products") {
-    def unique_id: Rep[String] = column[String]("PID", O.Unique)
+    def unique_id: Rep[String] = column[String]("PID", O.Unique, O.PrimaryKey)
     def name: Rep[String] = column[String]("PNAME")
     def desc: Rep[String] = column[String]("PDESC")
     def imgSrc: Rep[String] = column[String]("PISRC")
