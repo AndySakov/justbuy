@@ -78,7 +78,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
         case Some(data) =>
           val username = data("username").head
           val pass = data("pass").head
-          users.getUser(username, pass).map(v => Ok(Json.obj(("success", Json.toJson(v.isEmpty)))))
+          users.getUser(username, pass).map(v => Ok(Json.obj(("success", Json.toJson(v.nonEmpty)))))
         case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
       }
     }
