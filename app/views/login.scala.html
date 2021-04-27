@@ -1,4 +1,4 @@
-@()
+@()(implicit flash: Flash)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +18,12 @@
       <div class="row flex-grow">
         <div class="col-lg-4 mx-auto">
           <div class="auth-form-light text-left p-5">
+            <div class="alert alert-dismissible alert-secondary @flash.get("notice-type").getOrElse("")" @flash.get("showing").getOrElse("hidden") role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true" size="0.3px">x</span>
+            </button>
+            @flash.get("notice").getOrElse("")
+          </div>
             <div class="brand-logo">
               <img src="/assets/img/logo.svg">
             </div>
@@ -25,7 +31,7 @@
             <h6 class="font-weight-light">Sign in to continue.</h6>
             <form class="pt-3" method="post" enctype="application/x-www-form-urlencoded" action="/auth/user">
               <div class="form-group">
-                <input type="email" class="form-control form-control-lg" name="username" id="exampleInputEmail1" placeholder="Username" required>
+                <input type="text" class="form-control form-control-lg" name="username" id="exampleInputEmail1" placeholder="Username" required>
               </div>
               <div class="form-group">
                 <input type="password" class="form-control form-control-lg" id="exampleInputPassword1" name="pass" placeholder="Password" required>

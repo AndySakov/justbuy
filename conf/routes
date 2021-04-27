@@ -34,5 +34,3 @@ GET     /create           controllers.PageController.create()
 
 GET     /                 controllers.PageController.red2L()
 
-GET     /*O               controllers.PageController.fof(O: String)
-

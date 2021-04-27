@@ -1,15 +1,15 @@
 package controllers
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 
-import api.misc.Message
+import api.misc.exceptions.{UserCreateSuccess, UserNotFoundAtLoginException}
 import api.utils.UUIDGenerator.randomUUID
+import api.utils.Utils._
 import dao.UserDAO
 import javax.inject._
 import models.User
 import play.api.libs.json.Json
 import play.api.mvc._
-import api.utils.Utils._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,10 +36,8 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
           val phone = data("phone").head
           val pass = data("pass").head
           val fullname = data("name").head
-          users.createUser(User(unique_id = randomUUID, username = username, email = email, phone = phone, pass = pass, fullname = fullname, toc = LocalDateTime.now())).map(x => Ok(Json.obj(
-            ("success", Json.toJson(x._1)),
-            ("message", Json.toJson(Message.message(x._2)))
-          )))
+          users.createUser(User(unique_id = randomUUID, username = username, email = email, phone = phone, pass = pass, fullname = fullname, toc = LocalDateTime.now())).
+            map(_ => throw UserCreateSuccess("User account created successfully!"))
         case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
       }
     }
@@ -59,8 +57,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
           val username = data("username").head
           val pass = data("pass").head
           val update = data("new_detail").head
-          users.updateUser(users.getUser(username, pass), part, update).map(_ => Ok(Json.obj(("success", Json.toJson(true)))))
-        case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
+          users.updateUser(username, pass, part, update).map(_ => Ok(Json.obj(("success", Json.toJson(true)))))
       }
     }
   }
@@ -78,7 +75,10 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
         case Some(data) =>
           val username = data("username").head
           val pass = data("pass").head
-          users.getUser(username, pass).map(v => Ok(Json.obj(("success", Json.toJson(v.nonEmpty)))))
+          users.getUser(username, pass).map {
+            case Left(_) => throw UserNotFoundAtLoginException("User not found!")
+            case Right(_) => Ok("You're in!")
+          }
         case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
       }
     }

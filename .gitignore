@@ -18,3 +18,4 @@ server.pid
 .idea/
 .vscode/
 .metals/
+run-dev.bat

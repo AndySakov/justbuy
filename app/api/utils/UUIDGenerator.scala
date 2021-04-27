@@ -3,7 +3,7 @@ package api.utils
 import scala.util.Random
 
 object UUIDGenerator {
-  private val all: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=[]\\;',./~!@#$%^&*()_+{}|:\"<>?"
+  private val all: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
   private val space: Int = all.length
 
   def random(i: Int): String = {
