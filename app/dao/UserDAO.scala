@@ -5,7 +5,7 @@ import java.sql.SQLIntegrityConstraintViolationException
 import java.time.LocalDateTime
 
 import api.misc.Message
-import api.misc.exceptions.{PasswordNotHashableException, UserCreateFailedException, UserCreateSuccess, UserUpdateFailedException, UserUpdateSuccess, UsernameTakenException}
+import api.misc.exceptions._
 import io.mattmoore.bcrypt.BCrypt.{checkpw, hashpw}
 import javax.inject.Inject
 import models.User
@@ -13,7 +13,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, CanAwait, ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
@@ -25,6 +25,8 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
   import dbConfig.profile.api._
 
   private val Users = TableQuery[UsersTable]
+
+
 
   /**
    * Function to create a new user
@@ -53,12 +55,11 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
       case Right(user) =>
         val op: DBIOAction[Unit, NoStream, Effect.Write] = part match {
           case "username" => Users.filter(x => x.unique_id === user.unique_id).map(_.username).update(new_detail).map(_ => ())
-          case "pass" => Users.filter(x => x.unique_id === user.unique_id).map(_.pass).update(hashpw(new_detail).getOrElse(throw PasswordNotHashableException("Password could not be hashed!"))).map(_ => ())
+          case "password" => Users.filter(x => x.unique_id === user.unique_id).map(_.pass).update(hashpw(new_detail).getOrElse(throw PasswordNotHashableException("Password could not be hashed!"))).map(_ => ())
           case "fullname" => Users.filter(x => x.unique_id === user.unique_id).map(_.fullname).update(new_detail).map(_ => ())
           case "phone" => Users.filter(x => x.unique_id === user.unique_id).map(_.phone).update(new_detail).map(_ => ())
         }
         db.run(op)
-        throw UserUpdateSuccess("User updated successfully!")
     }
   }
 
@@ -84,8 +85,17 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
    * @param pass the password of the user to delete
    * @return a future with unit
    */
-  def deleteUser(username: String, pass: String): Future[Unit] = {
-    db.run(Users.filter(x => x.username === username && x.pass === pass).delete).map(_ => ())
+  def deleteUser(username: String, pass: String): Future[Future[Either[Boolean, Boolean]]] = {
+    getUser(username, pass) map {
+      case Right(user) =>
+        db.run{
+          Users.filter(_.username === user.username).delete
+        } map {
+          case 1 => Right(true)
+          case _ => Left(false)
+        }
+      case Left(_) => throw UserDeleteFailedException("")
+    }
   }
 
 

@@ -2,7 +2,7 @@ package controllers
 
 import java.time.LocalDateTime
 
-import api.misc.exceptions.{UserCreateSuccess, UserNotFoundAtLoginException}
+import api.misc.exceptions.{UserCreateSuccess, UserDeleteSuccess, UserNotFoundAtLoginException, UserUpdateSuccess}
 import api.utils.UUIDGenerator.randomUUID
 import api.utils.Utils._
 import dao.UserDAO
@@ -31,7 +31,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
     implicit request: Request[AnyContent] => {
       body match {
         case Some(data) =>
-          val username = data("user").head
+          val username = data("username").head
           val email = data("email").head
           val phone = data("phone").head
           val pass = data("pass").head
@@ -57,7 +57,9 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
           val username = data("username").head
           val pass = data("pass").head
           val update = data("new_detail").head
-          users.updateUser(username, pass, part, update).map(_ => Ok(Json.obj(("success", Json.toJson(true)))))
+          users.updateUser(username, pass, part, update)
+          throw UserUpdateSuccess("User updated successfully!")
+        case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
       }
     }
   }
@@ -97,7 +99,8 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
         case Some(data) =>
           val username = data("username").head
           val pass = data("pass").head
-          users.deleteUser(username, pass).map(_ => Ok(Json.obj(("success", Json.toJson(true)))))
+          users.deleteUser(username, pass)
+          throw UserDeleteSuccess("You have successfully deleted your user!")
         case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
       }
     }
