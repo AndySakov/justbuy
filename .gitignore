@@ -14,8 +14,8 @@ server.pid
 *.iml
 /dist/
 .cache
-.bloop/
-.idea/
-.vscode/
-.metals/
-run-dev.bat
+.bloop/*
+.idea/*
+.vscode/*
+.metals/*
+.env

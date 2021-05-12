@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import api.misc.exceptions.{UserCreateSuccess, UserDeleteSuccess, UserNotFoundAtLoginException, UserUpdateSuccess}
 import api.utils.UUIDGenerator.randomUUID
 import api.utils.Utils._
+import auth.{AuthAction, AuthRequest}
 import dao.UserDAO
 import javax.inject._
 import models.User
@@ -18,7 +19,7 @@ import scala.concurrent.Future
  * This controller creates an `Action` to handle HTTP requests that alter the users table
  */
 @Singleton
-class UserController @Inject()(users: UserDAO, val controllerComponents: ControllerComponents) extends BaseController {
+class UserController @Inject()(authAction: AuthAction, users: UserDAO, val controllerComponents: ControllerComponents) extends BaseController {
 
   /**
    * User creation handler
@@ -50,8 +51,8 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
    * will be called when the application receives a `PUT` request with
    * a path of `/update/user/:part` where part is the detail to update.
    */
-  def updateUser(part: String): Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] => {
+  def updateUser(part: String): Action[AnyContent] = authAction.async {
+    implicit request: AuthRequest[AnyContent] => {
       body match {
         case Some(data) =>
           val username = data("username").head
@@ -79,7 +80,7 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
           val pass = data("pass").head
           users.getUser(username, pass).map {
             case Left(_) => throw UserNotFoundAtLoginException("User not found!")
-            case Right(_) => Ok("You're in!")
+            case Right(user) => Redirect("/home").withNewSession.withSession("userID" -> user.unique_id)
           }
         case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
       }
@@ -93,17 +94,22 @@ class UserController @Inject()(users: UserDAO, val controllerComponents: Control
    * will be called when the application receives a `DELETE` request with
    * a path of `/delete/user`.
    */
-  def removeUser(): Action[AnyContent] = Action.async {
-    implicit request: Request[AnyContent] => {
+  def removeUser(): Action[AnyContent] = authAction {
+    implicit request: AuthRequest[AnyContent] => {
       body match {
         case Some(data) =>
           val username = data("username").head
           val pass = data("pass").head
           users.deleteUser(username, pass)
           throw UserDeleteSuccess("You have successfully deleted your user!")
-        case None => Future(Forbidden(Json.obj(("error", Json.toJson("Request contained no data!")))))
+        case None => Forbidden(Json.obj(("error", Json.toJson("Request contained no data!"))))
       }
     }
+  }
+
+  def logout: Action[AnyContent] = authAction {
+    implicit request: Request[AnyContent] =>
+      Redirect("/login").withNewSession
   }
 }
  

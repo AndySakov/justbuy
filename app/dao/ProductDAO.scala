@@ -3,21 +3,19 @@ package dao
 
 import java.time.LocalDateTime
 
-import api.misc.Message
-import models.Categories.Category
+import api.misc.exceptions._
 import javax.inject.Inject
+import models.Categories.Category
 import models.Product
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
 class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext) {
 
-  type Cr8Result = (Boolean, Message.Value)
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
   import dbConfig.profile.api._
@@ -29,11 +27,9 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
    * @param newbie the product to create
    * @return a future with the result of the operation
    */
-  def createProduct(newbie: Product): Future[Cr8Result] = db.run((Products += newbie).asTry) map {
-    case Failure(exception) => exception match {
-      case _ => (false, Message.UNKNOWN_ERROR)
-    }
-    case Success(_) => (true, Message.SUCCESS)
+  def createProduct(newbie: Product): Future[Unit] = db.run((Products += newbie).asTry) map {
+    case Failure(_) => throw ProductCreateFailedException("Products could not be added to catalogue!")
+    case Success(_) => throw ProductCreateSuccess("Products added successfully!")
   }
 
   /**
@@ -41,11 +37,9 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
    * @param newbies the list of products to create
    * @return a future with the result of the operation
    */
-  def createProducts(newbies: List[Product]): Future[Cr8Result] = db.run((Products ++= newbies).asTry) map {
-    case Failure(exception) => exception match {
-      case _ => (false, Message.UNKNOWN_ERROR)
-    }
-    case Success(_) => (true, Message.SUCCESS)
+  def createProducts(newbies: List[Product]): Future[Unit] = db.run((Products ++= newbies).asTry) map {
+    case Failure(_) => throw ProductCreateFailedException("Products could not be added to catalogue!")
+    case Success(_) => throw ProductCreateSuccess("Products added successfully!")
   }
 
   /**
@@ -55,57 +49,24 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
    * @param new_value the new value to update the entry with
    * @return a future with unit
    */
-  def updateProduct(oldie: Future[Seq[Product]], part: String, new_value: Either[String, Double]): Future[Unit] = {
-    val product = Await.result(oldie, 10 seconds).head
+  def updateProduct(oldie: Product, part: String, new_value: Either[String, Double], merchant: String): Future[Unit] = {
     val op: DBIOAction[Unit, NoStream, Effect.Write] = new_value match {
       case Left(value) =>
         part match {
-          case "name" => Products.filter(x => x.unique_id === product.unique_id).map(_.name).update(value).map(_ => ())
-          case "brand" => Products.filter(x => x.unique_id === product.unique_id).map(_.brand).update(value).map(_ => ())
-          case "category" => Products.filter(x => x.unique_id === product.unique_id).map(_.category).update(value).map(_ => ())
-          case "description" => Products.filter(x => x.unique_id === product.unique_id).map(_.desc).update(value).map(_ => ())
-          case "imgSrc" => Products.filter(x => x.unique_id === product.unique_id).map(_.imgSrc).update(value).map(_ => ())
-          case "available" => Products.filter(x => x.unique_id === product.unique_id).map(_.available).update(value.toBoolean).map(_ => ())
+          case "name" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.name).update(value).map(_ => ())
+          case "brand" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.brand).update(value).map(_ => ())
+          case "category" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.category).update(value).map(_ => ())
+          case "description" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.desc).update(value).map(_ => ())
+          case "imgSrc" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.imgSrc).update(value).map(_ => ())
+          case "available" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.available).update(value.toBoolean).map(_ => ())
         }
       case Right(value) => part match {
-        case "price" => Products.filter(x => x.unique_id === product.unique_id).map(_.price).update(value).map(_ => ())
-        case "discount" => Products.filter(x => x.unique_id === product.unique_id).map(_.discount).update(value).map(_ => ())
-        case "stock" => Products.filter(x => x.unique_id === product.unique_id).map(_.stock).update(value.toInt).map(_ => ())
+        case "price" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.price).update(value).map(_ => ())
+        case "discount" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.discount).update(value).map(_ => ())
+        case "stock" => Products.filter(x => x.unique_id === oldie.unique_id && x.merchant === merchant).map(_.stock).update(value.toInt).map(_ => ())
       }
     }
-
     db.run(op)
-  }
-
-  /**
-   * Function to update a detail in several product entries
-   * @param oldies the old version of the product entry
-   * @param part the detail to update
-   * @param new_value the new value to update the entry with
-   * @return a future with unit
-   */
-  def updateProducts(oldies: Future[Seq[Product]], part: String, new_value: Either[String, Double]): Future[Unit] = {
-    val ops = Await.result(oldies, 10 seconds).map{
-      product =>
-        new_value match {
-          case Left(value) =>
-            part match {
-              case "name" => Products.filter(x => x.unique_id === product.unique_id).map(_.name).update(value).map(_ => ())
-              case "brand" => Products.filter(x => x.unique_id === product.unique_id).map(_.brand).update(value).map(_ => ())
-              case "category" => Products.filter(x => x.unique_id === product.unique_id).map(_.category).update(value).map(_ => ())
-              case "description" => Products.filter(x => x.unique_id === product.unique_id).map(_.desc).update(value).map(_ => ())
-              case "imgSrc" => Products.filter(x => x.unique_id === product.unique_id).map(_.imgSrc).update(value).map(_ => ())
-              case "available" => Products.filter(x => x.unique_id === product.unique_id).map(_.available).update(value.toBoolean).map(_ => ())
-            }
-          case Right(value) => part match {
-            case "price" => Products.filter(x => x.unique_id === product.unique_id).map(_.price).update(value).map(_ => ())
-            case "discount" => Products.filter(x => x.unique_id === product.unique_id).map(_.discount).update(value).map(_ => ())
-            case "stock" => Products.filter(x => x.unique_id === product.unique_id).map(_.stock).update(value.toInt).map(_ => ())
-          }
-        }
-    }
-
-    db.run(DBIO.seq(ops: _*).transactionally)
   }
 
   /**
@@ -113,16 +74,20 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
    * @param unique_id the unique id of the product to select
    * @return a future with a sequence containing the product if it exists
    */
-  def getProductById(unique_id: String): Future[Seq[Product]] = {
-    db.run[Seq[Product]](Products.filter(v => v.unique_id === unique_id).result)
+  def getProductById(unique_id: String): Future[Option[Seq[Product]]] = {
+    db.run[Seq[Product]](Products.filter(v => v.unique_id === unique_id).result).map { c =>
+      if (c.isEmpty) None else Some(c)
+    }
   }
 
   /**
    * Function to select a product entry in the database by its ID
    * @return a future with a sequence containing all the available products
    */
-  def getProducts: Future[Seq[Product]] = {
-    db.run[Seq[Product]](Products.result)
+  def getProducts: Future[Option[Seq[Product]]] = {
+    db.run[Seq[Product]](Products.result).map { c =>
+      if (c.isEmpty) None else Some(c)
+    }
   }
 
   /**
@@ -130,8 +95,10 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
    * @param category the category of products to select
    * @return a future with a sequence containing the product if it exists
    */
-  def getProductsByCategory(category: Category): Future[Seq[Product]] = {
-    db.run[Seq[Product]](Products.filter(v => v.category === category.toString ).result)
+  def getProductsByCategory(category: Category): Future[Option[Seq[Product]]] = {
+    db.run[Seq[Product]](Products.filter(v => v.category === category.toString ).result).map { c =>
+      if (c.isEmpty) None else Some(c)
+    }
   }
 
   /**
@@ -139,8 +106,8 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
    * @param unique_id the unique id of the product to delete
    * @return a future with unit
    */
-  def deleteProduct(unique_id: String): Future[Unit] = {
-    db.run(Products.filter(x => x.unique_id === unique_id).delete).map(_ => ())
+  def deleteProduct(unique_id: String, merchant: String): Future[Unit] = {
+    db.run(Products.filter(x => x.unique_id === unique_id && x.merchant === merchant).delete).map(_ => ())
   }
 
 
@@ -156,7 +123,8 @@ class ProductDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implici
     def available: Rep[Boolean] = column[Boolean]("PAVAIL")
     def stock: Rep[Int] = column[Int]("PSTOCK")
     def toc: Rep[LocalDateTime] = column[LocalDateTime]("PTOC")
+    def merchant: Rep[String] = column[String]("PMERCH")
 
-    def * = (unique_id, name, desc, imgSrc, price, brand, category, discount, available, stock, toc) <> (Product.tupled, Product.unapply)
+    def * = (unique_id, name, desc, imgSrc, price, brand, category, discount, available, stock, toc, merchant) <> (Product.tupled, Product.unapply)
   }
 }

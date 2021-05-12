@@ -1,19 +1,18 @@
 package dao
 
 
-import java.sql.SQLIntegrityConstraintViolationException
-import java.time.LocalDateTime
-
 import api.misc.Message
 import api.misc.exceptions._
-import io.mattmoore.bcrypt.BCrypt.{checkpw, hashpw}
-import javax.inject.Inject
+import api.utils.BCrypt._
 import models.User
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
+import java.sql.SQLIntegrityConstraintViolationException
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, CanAwait, ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
@@ -25,7 +24,6 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
   import dbConfig.profile.api._
 
   private val Users = TableQuery[UsersTable]
-
 
 
   /**
@@ -71,7 +69,7 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
    */
   def getUser(username: String, pass: String): Future[Either[Boolean, User]] = {
     db.run(Users.filter(v => v.username === username).result) map {
-      case result => checkpw(pass, result.head.pass) match {
+      case result: Seq[UsersTable#TableElementType] => checkpw(pass, result.head.pass) match {
         case Right(_) => Right(result.head)
         case Left(_) => Left(false)
       }

@@ -1,7 +1,5 @@
 package api.utils
 
-import java.math.BigInteger
-import java.security.MessageDigest
 
 import io.circe.Json
 import play.api.mvc.{AnyContent, Request}

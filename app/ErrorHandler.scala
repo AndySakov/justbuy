@@ -34,14 +34,17 @@ class ErrorHandler @Inject() (
     )
   }
 
+
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     exception match {
       case UserNotFoundAtLoginException(reason) => Future.successful(Redirect("/login").flashing(flash(reason, "danger"): _*))
       case UsernameTakenException(reason) => Future.successful(Redirect("/create").flashing(flash(reason, "danger"): _*))
       case UserCreateFailedException(reason) => Future.successful(Redirect("/create").flashing(flash(reason, "danger"): _*))
+
       case UserCreateSuccess(reason) => Future.successful(Redirect("/login").flashing(flash(reason, "success"): _*))
       case UserUpdateSuccess(reason) => Future.successful(Redirect("/login").flashing(flash(reason, "success"): _*).withNewSession)
       case UserDeleteSuccess(reason) => Future.successful(Redirect("/login").flashing(flash(reason, "success"): _*).withNewSession)
+
       case _ => super.onServerError(request, exception)
     }
   }

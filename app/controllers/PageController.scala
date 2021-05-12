@@ -1,5 +1,7 @@
 package controllers
 
+import api.misc.exceptions.UserNotFoundAtLoginException
+import auth.{AuthAction, AuthRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Request}
 
@@ -7,7 +9,7 @@ import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, R
  * This controller creates an `Action` to handle HTTP requests to show pages
  */
 @Singleton
-class PageController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
+class PageController @Inject()(authAction: AuthAction, val controllerComponents: ControllerComponents) extends BaseController {
 
   /**
    * Error 404 custom return handler
@@ -31,5 +33,10 @@ class PageController @Inject()(val controllerComponents: ControllerComponents) e
 
   def create(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.register())
+  }
+
+  def home(): Action[AnyContent] = authAction {
+    implicit request: AuthRequest[AnyContent] =>
+      Ok(views.html.home())
   }
 }

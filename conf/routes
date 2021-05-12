@@ -25,7 +25,23 @@ GET     /login            controllers.PageController.login()
 
 GET     /create           controllers.PageController.create()
 
+GET     /home             controllers.PageController.home()
+
 # ProductController Routes
+
+POST    /create/product   controllers.ProductController.singleCreate()
+
+POST    /create/products  controllers.ProductController.multiCreate()
+
+GET     /get/products/all controllers.ProductController.getAll()
+
+GET     /get/products/id/:id    controllers.ProductController.getById(id: String)
+
+GET     /get/products/category/:cat    controllers.ProductController.getByCat(cat: String)
+
+PUT     /update/product/:id             controllers.ProductController.updateProduct(id: String)
+
+DELETE  /delete/product/:id             controllers.ProductController.deleteProduct(id: String)
 
 
 

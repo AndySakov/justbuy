@@ -16,5 +16,4 @@ import java.time.LocalDateTime
  * @param stock amount of this product in stock
  * @param toc the time of creation of this product account accurate to milliseconds
  */
-case class Product(unique_id: String, name: String, desc: String, imgSrc: String, price: Double, brand: String, category: String, discount: Double, available: Boolean, stock: Int, toc: LocalDateTime) {
-}
+case class Product(unique_id: String, name: String, desc: String, imgSrc: String, price: Double, brand: String, category: String, discount: Double, available: Boolean, stock: Int, toc: LocalDateTime, merchant: String)
