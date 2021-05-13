@@ -27,6 +27,8 @@ GET     /create           controllers.PageController.create()
 
 GET     /home             controllers.PageController.home()
 
+GET     /logout           controllers.PageController.logout()
+
 # ProductController Routes
 
 POST    /create/product   controllers.ProductController.singleCreate()

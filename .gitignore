@@ -1,11 +1,9 @@
 # Ignore Play! working directory #
-bin/
-/db
-.eclipse
 /lib/
 /logs/
 /modules
 /project/project
+/project/.bloop/*
 /project/target
 /target
 tmp/
@@ -14,8 +12,9 @@ server.pid
 *.iml
 /dist/
 .cache
-.bloop/*
-.idea/*
-.vscode/*
-.metals/*
+.bloop
+.idea
+.vscode
 .env
+.metals
+.bsp

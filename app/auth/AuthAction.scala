@@ -26,7 +26,7 @@ class AuthAction @Inject()(bodyParser: BodyParsers.Default)(implicit ec: Executi
 
   // Helper for extracting the token value
   private def authSession[A](request: Request[A]): Option[AuthRequest[A]] =
-    request.session.get("username") match {
+    request.session.get("userID") match {
       case Some(value) => Some(AuthRequest(request, value))
       case None => None
     }

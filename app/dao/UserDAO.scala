@@ -19,8 +19,8 @@ import scala.util.{Failure, Success}
 class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext) {
 
   type Cr8Result = (Boolean, Message.Value)
-  val dbConfig = dbConfigProvider.get[JdbcProfile]
-  val db = dbConfig.db
+  private val dbConfig = dbConfigProvider.get[JdbcProfile]
+  private val db = dbConfig.db
   import dbConfig.profile.api._
 
   private val Users = TableQuery[UsersTable]
@@ -65,13 +65,29 @@ class UserDAO @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit e
    * Function to select a user entry in the database
    * @param username the username of the user to select
    * @param pass the password of the user to select
-   * @return a future with a sequence containing the user if it exists
+   * @return a future containing either a boolean or a user
    */
   def getUser(username: String, pass: String): Future[Either[Boolean, User]] = {
     db.run(Users.filter(v => v.username === username).result) map {
       case result: Seq[UsersTable#TableElementType] => checkpw(pass, result.head.pass) match {
         case Right(_) => Right(result.head)
         case Left(_) => Left(false)
+      }
+      case _ => Left(false)
+    }
+  }
+
+  /**
+   * Function to select a user entry in the database
+   * @param userID the unique id of the user to select
+   * @return a future containing either a boolean or a user
+   */
+  def getUser(userID: String): Future[Either[Boolean, User]] = {
+    db.run(Users.filter(v => v.unique_id === userID).result) map {
+      case result: Seq[UsersTable#TableElementType] => if(result.isEmpty){
+        Left(false)
+      } else {
+        Right(result.head)
       }
       case _ => Left(false)
     }

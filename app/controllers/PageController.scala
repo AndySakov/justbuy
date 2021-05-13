@@ -4,12 +4,14 @@ import api.misc.exceptions.UserNotFoundAtLoginException
 import auth.{AuthAction, AuthRequest}
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Request}
+import dao.UserDAO
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * This controller creates an `Action` to handle HTTP requests to show pages
  */
 @Singleton
-class PageController @Inject()(authAction: AuthAction, val controllerComponents: ControllerComponents) extends BaseController {
+class PageController @Inject()(authAction: AuthAction, users: UserDAO, val controllerComponents: ControllerComponents) extends BaseController {
 
   /**
    * Error 404 custom return handler
@@ -35,8 +37,18 @@ class PageController @Inject()(authAction: AuthAction, val controllerComponents:
     Ok(views.html.register())
   }
 
-  def home(): Action[AnyContent] = authAction {
+  def home(): Action[AnyContent] = authAction.async {
     implicit request: AuthRequest[AnyContent] =>
-      Ok(views.html.home())
+      users.getUser(request.userID) map {
+        user => user match {
+          case Left(_) => Forbidden("")
+          case Right(userObj) => Ok(views.html.home(userObj))
+        }
+      }
+  }
+
+  def logout(): Action[AnyContent] = authAction {
+    implicit request: AuthRequest[AnyContent] =>
+      Redirect("/login").withNewSession
   }
 }
