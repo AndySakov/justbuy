@@ -1,5 +1,21 @@
 {
     "files.watcherExclude": {
         "**/target": true
-    }
+    },
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "l0ebsc9jituxzmts.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "JustBuy DB",
+            "group": "prod",
+            "database": "rux1j9plno2rkhkl",
+            "username": "qgbi3hjh3ztxar0f",
+            "password": "zj5qywldzkwt2ms9"
+        }
+    ]
 }

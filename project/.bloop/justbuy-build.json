@@ -293,10 +293,6 @@
                     "artifacts": [
                         {
                             "name": "sbt-bloop",
-                            "checksum": {
-                                "type": "sha1",
-                                "digest": "46dd511fba56561324dce6a02828b0bdd47acd8b"
-                            },
                             "path": "/home/andysakov/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.4.8-19-4d9f966b/sbt-bloop-1.4.8-19-4d9f966b.jar"
                         }
                     ]
@@ -2272,6 +2268,10 @@
                     "artifacts": [
                         {
                             "name": "gigahorse-okhttp_2.12",
+                            "path": "/home/andysakov/.cache/coursier/v1/https/repo1.maven.org/maven2/com/eed3si9n/gigahorse-okhttp_2.12/0.5.0/gigahorse-okhttp_2.12-0.5.0.jar"
+                        },
+                        {
+                            "name": "gigahorse-okhttp_2.12",
                             "checksum": {
                                 "type": "sha1",
                                 "digest": "60f331a4fabbbbd95e877de36d3723bc236c77b8"
@@ -2580,6 +2580,10 @@
                     "version": "3.14.2",
                     "configurations": "default",
                     "artifacts": [
+                        {
+                            "name": "okhttp",
+                            "path": "/home/andysakov/.cache/coursier/v1/https/repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/3.14.2/okhttp-3.14.2.jar"
+                        },
                         {
                             "name": "okhttp",
                             "checksum": {
